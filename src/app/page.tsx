@@ -43,7 +43,7 @@ export default function Home() {
 
   if (!isClient || !initialSnippet) {
     return (
-       <div className="min-h-screen container mx-auto py-8 flex flex-col items-center justify-center">
+       <div className="min-h-screen container mx-auto p-4 flex flex-col items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
         <p className="text-muted-foreground">Loading your game...</p>
       </div>
@@ -51,29 +51,35 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen container mx-auto py-8">
-      <header className="text-center mb-8 relative">
-        <div className="flex items-center justify-center gap-4 mb-2">
-            <Code className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tight">
-              Code Guesser
-            </h1>
+    <main className="min-h-screen container mx-auto p-4 md:py-8">
+      <header className="mb-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+                <Code className="w-8 h-8 md:w-10 md:h-10 text-primary" />
+                <h1 className="text-3xl md:text-5xl font-bold font-headline tracking-tight">
+                Code Guesser
+                </h1>
+            </div>
+            <div className="flex items-center gap-4">
+                <p className="text-muted-foreground text-base md:text-lg hidden sm:block">
+                    Can you guess the programming language?
+                </p>
+                <SettingsMenu 
+                    allLanguages={LANGUAGES as Language[]}
+                    activeLanguages={activeLanguages}
+                    onActiveLanguagesChange={handleLanguageChange}
+                >
+                    <Button variant="ghost" size="icon">
+                    <Settings className="h-6 w-6" />
+                    <span className="sr-only">Settings</span>
+                    </Button>
+                </SettingsMenu>
+            </div>
         </div>
-        <p className="text-muted-foreground text-lg">
-          Can you guess the programming language?
+        <p className="text-muted-foreground text-center text-base mt-4 sm:hidden">
+            Can you guess the programming language?
         </p>
-         <div className="absolute top-0 right-0">
-          <SettingsMenu 
-            allLanguages={LANGUAGES as Language[]}
-            activeLanguages={activeLanguages}
-            onActiveLanguagesChange={handleLanguageChange}
-          >
-            <Button variant="ghost" size="icon">
-              <Settings className="h-6 w-6" />
-              <span className="sr-only">Settings</span>
-            </Button>
-          </SettingsMenu>
-        </div>
+
       </header>
       <CodeGuesser initialSnippet={initialSnippet} activeLanguages={activeLanguages} />
     </main>
