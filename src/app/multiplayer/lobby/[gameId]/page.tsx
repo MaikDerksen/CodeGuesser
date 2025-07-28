@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, User, Copy } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 
 // This is a placeholder for a real user object, maybe from a real auth system later
@@ -101,8 +101,10 @@ export default function Lobby() {
     };
     
     const copyGameId = () => {
-        navigator.clipboard.writeText(gameId as string);
-        toast({ title: "Game ID copied to clipboard!" });
+        if (typeof window !== "undefined") {
+            navigator.clipboard.writeText(gameId as string);
+            toast({ title: "Game ID copied to clipboard!" });
+        }
     }
 
     if (loading) {
@@ -150,7 +152,7 @@ export default function Lobby() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-4 p-3 border rounded-md bg-muted">
-                <p className="text-lg font-mono flex-1">{gameId}</p>
+                <p className="text-lg font-mono flex-1 overflow-x-auto">{gameId}</p>
                 <Button variant="ghost" size="icon" onClick={copyGameId}>
                     <Copy className="h-5 w-5" />
                 </Button>
@@ -162,7 +164,7 @@ export default function Lobby() {
                     {game.players.map(player => (
                         <div key={player.id} className="flex items-center gap-4 p-2 rounded-md border">
                              <Avatar>
-                                <AvatarImage src={`https://placehold.co/128x128.png`} />
+                                <AvatarImage src={`https://placehold.co/128x128.png`} data-ai-hint="avatar" />
                                 <AvatarFallback><User /></AvatarFallback>
                             </Avatar>
                             <p className="font-medium flex-1">{player.name} {player.id === currentPlayer.id && "(You)"}</p>

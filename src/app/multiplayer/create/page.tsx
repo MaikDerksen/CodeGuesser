@@ -44,7 +44,7 @@ export default function CreateGame() {
           difficulty,
           languages: Array.from(selectedLanguages),
         },
-        players: {},
+        players: [],
         status: "waiting",
         currentRound: 0,
         createdAt: serverTimestamp(),
