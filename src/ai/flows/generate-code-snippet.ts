@@ -102,11 +102,12 @@ Follow these rules precisely:
 
 3.  **solution**: This field must exactly match the "language" field.
 
-4.  **snippet**: Generate a syntactically valid code snippet (e.g., a function, class, loop) of about 10-20 lines for the chosen language. Then, format this snippet according to the selected difficulty:
+4.  **snippet**: Generate a syntactically valid code snippet (e.g., a function, class, loop) of about 10-20 lines for the chosen language. Then, format this snippet according to the selected difficulty. Your response for the snippet field must be a string containing ONLY the code, formatted as described.
+
     *   **EASY**: The snippet must be a multi-line string, properly indented, with HTML \`<span>\` tags for basic syntax highlighting. The containing element has a dark background. Use distinct, bright, high-contrast inline CSS \`color\` styles for keywords (e.g., '#81A1C1'), strings (e.g., '#A3BE8C'), comments (e.g., '#5E81AC'), and other token types.
-    *   **MEDIUM**: The snippet must be a multi-line string, properly indented, but in plain text with no syntax highlighting.
-    *   **HARD**: The snippet must be a single-line string. Remove all unnecessary whitespace and line breaks, leaving only minimal required separators (like semicolons or commas).
-    *   **HARDCORE**: The snippet must be a single-line string with absolutely no whitespace. Additionally, randomly replace 1 to 3 significant tokens or identifiers with a single underscore character ('_').
+    *   **MEDIUM**: The snippet must be a multi-line string, properly indented, but in plain text with NO SYNTAX HIGHLIGHTING and NO HTML TAGS.
+    *   **HARD**: The snippet must be a single-line string with NO HTML TAGS. Remove all unnecessary whitespace and line breaks, leaving only minimal required separators (like semicolons or commas).
+    *   **HARDCORE**: The snippet must be a single-line string with NO HTML TAGS and absolutely NO WHITESPACE. Additionally, randomly replace 1 to 3 significant tokens or identifiers with a single underscore character ('_').
 
 **Available Languages**:
 C, C++, C#, Java, JavaScript, TypeScript, Python, Ruby, PHP, Go, Rust, Swift, Kotlin, SQL, MATLAB, R, Bash, PowerShell, Visual Basic, Perl, Haskell, Elm, F#, OCaml, Elixir, Scala, Lisp, ML, Prolog, Erlang, Brainfuck, Befunge, Piet, Assembly, Dart, Julia, Nim, Objective-C, Ada, GDScript, Hack, Cobol, Fortran, Lua, Crystal, D, Smalltalk, Forth, Racket, Tcl, Scheme, VHDL, Verilog.
