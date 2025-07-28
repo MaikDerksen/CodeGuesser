@@ -175,11 +175,12 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
                 </Link>
                 <div className="p-2 border rounded-md">
                     <Image
-                        src="/buy-me-a-coffee-qr.png"
+                        src="https://placehold.co/128x128.png"
                         alt="Buy me a coffee QR Code"
                         width={128}
                         height={128}
                         className="rounded-sm"
+                        data-ai-hint="qr code"
                     />
                 </div>
             </CardContent>
