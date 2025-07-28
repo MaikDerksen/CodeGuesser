@@ -13,6 +13,7 @@ import { LANGUAGES } from "@/lib/languages";
 import { CheckCircle2, XCircle, Loader2, Coffee } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface Stats {
   total: number;
@@ -197,6 +198,19 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
                         data-ai-hint="qr code"
                     />
                 </div>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>Why is your support important?</AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground space-y-2">
+                     <p>
+                        This game is a passion project, and it's completely free to play. However, creating this unique experience requires using powerful AI models to generate the code snippets, which has real-world costs.
+                      </p>
+                      <p>
+                        Your support helps cover these operational expenses and allows me to continue improving the game with new features and more languages. Thank you for being a part of the journey!
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
             </CardContent>
         </Card>
       </div>
