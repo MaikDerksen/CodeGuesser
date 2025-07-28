@@ -103,7 +103,7 @@ Follow these rules precisely:
 3.  **solution**: This field must exactly match the "language" field.
 
 4.  **snippet**: Generate a syntactically valid code snippet (e.g., a function, class, loop) of about 10-20 lines for the chosen language. Then, format this snippet according to the selected difficulty:
-    *   **EASY**: The snippet must be a multi-line string, properly indented, with HTML \`<span>\` tags for basic syntax highlighting. Use distinct inline CSS \`color\` styles for keywords, strings, comments, and other token types.
+    *   **EASY**: The snippet must be a multi-line string, properly indented, with HTML \`<span>\` tags for basic syntax highlighting. The containing element has a dark background. Use distinct, bright, high-contrast inline CSS \`color\` styles for keywords (e.g., '#81A1C1'), strings (e.g., '#A3BE8C'), comments (e.g., '#5E81AC'), and other token types.
     *   **MEDIUM**: The snippet must be a multi-line string, properly indented, but in plain text with no syntax highlighting.
     *   **HARD**: The snippet must be a single-line string. Remove all unnecessary whitespace and line breaks, leaving only minimal required separators (like semicolons or commas).
     *   **HARDCORE**: The snippet must be a single-line string with absolutely no whitespace. Additionally, randomly replace 1 to 3 significant tokens or identifiers with a single underscore character ('_').
