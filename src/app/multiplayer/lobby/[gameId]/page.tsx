@@ -30,6 +30,7 @@ interface GameState {
     players: Player[];
     status: 'waiting' | 'playing' | 'finished';
     hostId?: string;
+    currentRound: number;
 }
 
 export default function Lobby() {
@@ -40,6 +41,8 @@ export default function Lobby() {
     const [loading, setLoading] = useState(true);
     const [playerName, setPlayerName] = useState("");
     const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
+    const [isStarting, setIsStarting] = useState(false);
+
 
     // Get or create a unique player ID
     const getPlayerId = () => {
@@ -59,6 +62,10 @@ export default function Lobby() {
                 const gameData = doc.data() as GameState;
                 setGame(gameData);
                 
+                if (gameData.status === 'playing') {
+                    router.push(`/multiplayer/game/${gameId}`);
+                }
+
                 const playerId = getPlayerId();
                 const playerInGame = gameData.players.find(p => p.id === playerId);
                 if(playerInGame) {
@@ -97,13 +104,39 @@ export default function Lobby() {
 
         } catch (error) {
             console.error("Error joining lobby:", error);
+            toast({
+                title: "Error joining lobby",
+                description: "Could not join the lobby. Please try again.",
+                variant: "destructive"
+            });
         }
     };
     
+    const startGame = async () => {
+        if (!gameId || !currentPlayer?.isHost) return;
+        setIsStarting(true);
+        try {
+            const gameRef = doc(db, "games", gameId as string);
+            await updateDoc(gameRef, {
+                status: 'playing',
+                currentRound: 1,
+            });
+            // The useEffect will handle the redirect for all players
+        } catch (error) {
+            console.error("Error starting game:", error);
+            toast({
+                title: "Error starting game",
+                description: "Could not start the game. Please try again.",
+                variant: "destructive"
+            });
+            setIsStarting(false);
+        }
+    }
+
     const copyGameId = () => {
         if (typeof window !== "undefined") {
-            navigator.clipboard.writeText(gameId as string);
-            toast({ title: "Game ID copied to clipboard!" });
+            navigator.clipboard.writeText(window.location.href);
+            toast({ title: "Lobby URL copied to clipboard!" });
         }
     }
 
@@ -133,6 +166,7 @@ export default function Lobby() {
                             placeholder="Your awesome name..."
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && joinLobby()}
                         />
                         <Button onClick={joinLobby}>Join Lobby</Button>
                     </CardContent>
@@ -148,7 +182,7 @@ export default function Lobby() {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl md:text-3xl">Lobby: Waiting for Players</CardTitle>
-            <CardDescription>Share the game ID with your friends to let them join.</CardDescription>
+            <CardDescription>Share the link with your friends to let them join.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-4 p-3 border rounded-md bg-muted">
@@ -168,19 +202,19 @@ export default function Lobby() {
                                 <AvatarFallback><User /></AvatarFallback>
                             </Avatar>
                             <p className="font-medium flex-1">{player.name} {player.id === currentPlayer.id && "(You)"}</p>
-                            {player.isHost && <span className="text-xs font-bold text-primary rounded-full bg-primary/10 px-2 py-1">HOST</span>}
+                            {game.hostId === player.id && <span className="text-xs font-bold text-primary rounded-full bg-primary/10 px-2 py-1">HOST</span>}
                         </div>
                     ))}
                 </div>
             </div>
 
-            {currentPlayer.isHost && (
-                <Button className="w-full" size="lg" disabled={game.players.length < 1}>
-                    Start Game ({game.players.length} players)
+            {game.hostId === currentPlayer.id && (
+                <Button className="w-full" size="lg" disabled={isStarting || game.players.length < 1} onClick={startGame}>
+                    {isStarting ? <Loader2 className="animate-spin" /> : `Start Game (${game.players.length} players)`}
                 </Button>
             )}
 
-            {!currentPlayer.isHost && (
+            {game.hostId !== currentPlayer.id && (
                 <div className="text-center text-muted-foreground">
                     <p>Waiting for the host to start the game...</p>
                 </div>
