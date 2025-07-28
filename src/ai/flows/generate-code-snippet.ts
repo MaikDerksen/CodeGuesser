@@ -106,7 +106,7 @@ Follow these rules precisely:
 2.  **language**:
     * If the "language" input field is provided, you MUST use that language.
     * If the "languages" input array is provided, you MUST choose one language at random from that list.
-    * If neither "language" nor "languages" is provided, you MUST choose one language at random from the full list provided below.
+    * If neither "language" nor "languages" is provided, you MUST choose one language at random from the full list provided below. Your selection must be genuinely random; do not show bias towards common languages like Python or JavaScript. Strive for variety in your selections.
 
 3.  **solution**: This field must exactly match the "language" field of the output.
 
