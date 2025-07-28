@@ -74,6 +74,7 @@ export type Language = z.infer<typeof LanguageSchema>;
 const GenerateCodeSnippetInputSchema = z.object({
   difficulty: DifficultySchema.optional().describe('The desired difficulty of the code snippet. If not provided, a random difficulty will be selected.'),
   language: LanguageSchema.optional().describe('A specific language to generate the snippet for. If not provided, a random language will be selected.'),
+  languages: z.array(LanguageSchema).optional().describe('A list of languages to choose from. If not provided, any language can be chosen.'),
   codeToTransform: z.string().optional().describe('An existing snippet of code to re-format to the new difficulty. If provided, the "language" field is required and a new snippet will not be generated.'),
 });
 export type GenerateCodeSnippetInput = z.infer<typeof GenerateCodeSnippetInputSchema>;
@@ -104,7 +105,8 @@ Follow these rules precisely:
 
 2.  **language**:
     * If the "language" input field is provided, you MUST use that language.
-    * If the "language" input field is NOT provided, you MUST choose one language at random from the full list provided below.
+    * If the "languages" input array is provided, you MUST choose one language at random from that list.
+    * If neither "language" nor "languages" is provided, you MUST choose one language at random from the full list provided below.
 
 3.  **solution**: This field must exactly match the "language" field of the output.
 
@@ -119,7 +121,11 @@ Follow these rules precisely:
     *   **HARDCORE**: The snippet must be a single-line string with NO HTML TAGS and absolutely NO WHITESPACE. Additionally, randomly replace 1 to 3 significant tokens or identifiers with a single underscore character ('_').
 
 **Available Languages**:
+{{#if languages}}
+{{#each languages}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+{{else}}
 C, C++, C#, Java, JavaScript, TypeScript, Python, Ruby, PHP, Go, Rust, Swift, Kotlin, SQL, MATLAB, R, Bash, PowerShell, Visual Basic, Perl, Haskell, Elm, F#, OCaml, Elixir, Scala, Lisp, ML, Prolog, Erlang, Brainfuck, Befunge, Piet, Assembly, Dart, Julia, Nim, Objective-C, Ada, GDScript, Hack, Cobol, Fortran, Lua, Crystal, D, Smalltalk, Forth, Racket, Tcl, Scheme, VHDL, Verilog.
+{{/if}}
 
 **Input Difficulty**: {{#if difficulty}}{{difficulty}}{{else}}random{{/if}}`,
 })

@@ -22,11 +22,12 @@ interface Stats {
 
 interface CodeGuesserProps {
   initialSnippet: GenerateCodeSnippetOutput;
+  activeLanguages: Language[];
 }
 
 const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD", "HARDCORE"];
 
-export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
+export function CodeGuesser({ initialSnippet, activeLanguages }: CodeGuesserProps) {
   const [snippetData, setSnippetData] = useState<GenerateCodeSnippetOutput>(initialSnippet);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [guessStatus, setGuessStatus] = useState<"idle" | "correct" | "incorrect">("idle");
@@ -72,7 +73,7 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
 
   const handleNextSnippet = () => {
     startTransition(async () => {
-      const newSnippet = await getNewSnippet(snippetData.difficulty);
+      const newSnippet = await getNewSnippet(snippetData.difficulty, activeLanguages);
       setSnippetData(newSnippet);
       setOriginalSnippet(newSnippet.snippet); // Save the new original snippet
       setSelectedLanguage("");
@@ -92,6 +93,8 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
   }
   
   const winPercentage = stats.total > 0 ? ((stats.correct / stats.total) * 100).toFixed(1) : "0.0";
+
+  const languageOptions = activeLanguages.length > 0 ? activeLanguages : LANGUAGES;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -114,7 +117,7 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
             {guessStatus === 'idle' && (
               <div className="flex flex-col gap-4">
                   <LanguageSelector
-                    languages={LANGUAGES}
+                    languages={languageOptions}
                     value={selectedLanguage}
                     onValueChange={setSelectedLanguage}
                     disabled={isPending}
