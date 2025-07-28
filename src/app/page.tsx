@@ -6,9 +6,10 @@ import { generateCodeSnippet } from "@/ai/flows/generate-code-snippet";
 import type { GenerateCodeSnippetOutput, Language } from "@/ai/flows/generate-code-snippet";
 import { CodeGuesser } from "./code-guesser";
 import { SettingsMenu } from "@/components/settings-menu";
-import { Code, Settings, Loader2 } from "lucide-react";
+import { Code, Settings, Loader2, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LANGUAGES } from "@/lib/languages";
+import Link from "next/link";
 
 
 export default function Home() {
@@ -64,6 +65,12 @@ export default function Home() {
                 <p className="text-muted-foreground text-base md:text-lg hidden sm:block">
                     Can you guess the programming language?
                 </p>
+                 <Link href="/multiplayer">
+                    <Button variant="outline">
+                        <Gamepad2 className="mr-2" />
+                        Multiplayer
+                    </Button>
+                </Link>
                 <SettingsMenu 
                     allLanguages={LANGUAGES as Language[]}
                     activeLanguages={activeLanguages}
