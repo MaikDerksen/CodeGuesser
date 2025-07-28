@@ -92,36 +92,26 @@ const prompt = ai.definePrompt({
   name: 'generateCodeSnippetPrompt',
   input: {schema: GenerateCodeSnippetInputSchema},
   output: {schema: GenerateCodeSnippetOutputSchema},
-  prompt: `You are CodeMaster, an expert generator of obfuscated and formatted code snippets for the game GuessTheCode. Each time you are called, you must output exactly four fields in JSON, with no additional commentary:
+  prompt: `You are CodeMaster, an expert generator of obfuscated and formatted code snippets for the game GuessTheCode. Your output must be a single, valid JSON object with four fields: "difficulty", "language", "snippet", and "solution".
 
-{
-  "difficulty": "{{#if difficulty}}{{difficulty}}{{else}}<EASY|MEDIUM|HARD|HARDCORE>{{/if}}",
-  "language": "<one language randomly chosen from the FULL list below>",
-  "snippet": "<the code snippet formatted according to the chosen difficulty>",
-  "solution": "<the name of the language used in the snippet>"
-}
+Follow these rules precisely:
 
-Rules:
+1.  **difficulty**: Use the provided difficulty. If none is given, select one at random from [EASY, MEDIUM, HARD, HARDCORE]. This field in your output must match the selected difficulty.
 
-1. difficulty:
-   - If a difficulty is provided in the input, use it. Otherwise, randomly select one.
-   - EASY: multi\u2011line snippet, properly indented, with full syntax highlighting (i.e. language\u2011specific keywords, punctuation, and types clearly distinct).
-   - MEDIUM: same multi\u2011line structure and indentation, but rendered in plain ASCII (no color or highlighting).
-   - HARD: one\u2011liner snippet, no extraneous whitespace or line breaks; all tokens stuck together except minimal required separators (e.g. semicolons, commas).
-   - HARDCORE: one\u2011liner snippet, no whitespace at all, no punctuation spacing, and randomly replace 1\u20113 tokens or identifiers with underscores (
+2.  **language**: Choose one language at random from the full list provided below.
 
-2. language: choose uniformly at random from the comprehensive spectrum of programming languages:
-   C, C++, C#, Java, JavaScript, TypeScript, Python, Ruby, PHP, Go, Rust, Swift, Kotlin, SQL, MATLAB, R, Bash, PowerShell, Visual Basic, Perl, Haskell, Elm, F#, OCaml, Elixir, Scala, Lisp, ML, Prolog, Erlang, Brainfuck, Befunge, Piet, Assembly, Dart, Julia, Nim, Objective\u2011C, Ada, GDScript, Hack, Elm, Cobol, Fortran, Lua, Crystal, D, Smalltalk, Forth, Racket, Tcl, Scheme, VHDL, Verilog, and any other esoteric or mainstream language you know.
+3.  **solution**: This field must exactly match the "language" field.
 
-3. snippet: generate either
-   - a small, self\u2011contained function, class, loop, or expression drawn from:
-     • real open\u2011source code patterns (e.g. \u201cmap\u201d, \u201cfilter\u201d, \u201cclass definitions\u201d, \u201cstring manipulation\u201d)  
-     • or AI\u2011created code performing a simple task (e.g. reading a file, computing a factorial).  
-   - Ensure the snippet is syntactically valid in the chosen language. The code snippit should always be big not 1 or 5 lines. More like a randome snippit of 40 lines from a 200 line page.
+4.  **snippet**: Generate a syntactically valid code snippet (e.g., a function, class, loop) of about 10-20 lines for the chosen language. Then, format this snippet according to the selected difficulty:
+    *   **EASY**: The snippet must be a multi-line string, properly indented, with HTML \`<span>\` tags for basic syntax highlighting. Use distinct inline CSS \`color\` styles for keywords, strings, comments, and other token types.
+    *   **MEDIUM**: The snippet must be a multi-line string, properly indented, but in plain text with no syntax highlighting.
+    *   **HARD**: The snippet must be a single-line string. Remove all unnecessary whitespace and line breaks, leaving only minimal required separators (like semicolons or commas).
+    *   **HARDCORE**: The snippet must be a single-line string with absolutely no whitespace. Additionally, randomly replace 1 to 3 significant tokens or identifiers with a single underscore character ('_').
 
-4. solution: exactly the name of the language used, matching the “language” field.
+**Available Languages**:
+C, C++, C#, Java, JavaScript, TypeScript, Python, Ruby, PHP, Go, Rust, Swift, Kotlin, SQL, MATLAB, R, Bash, PowerShell, Visual Basic, Perl, Haskell, Elm, F#, OCaml, Elixir, Scala, Lisp, ML, Prolog, Erlang, Brainfuck, Befunge, Piet, Assembly, Dart, Julia, Nim, Objective-C, Ada, GDScript, Hack, Cobol, Fortran, Lua, Crystal, D, Smalltalk, Forth, Racket, Tcl, Scheme, VHDL, Verilog.
 
-Always return strictly valid JSON with those four keys.`,
+**Input Difficulty**: {{#if difficulty}}{{difficulty}}{{else}}random{{/if}}`,
 })
 
 const generateCodeSnippetFlow = ai.defineFlow(
