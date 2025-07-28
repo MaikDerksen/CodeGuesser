@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import type { GenerateCodeSnippetOutput } from "@/ai/flows/generate-code-snippet";
+import type { GenerateCodeSnippetOutput, Difficulty } from "@/ai/flows/generate-code-snippet";
 import { getNewSnippet } from "@/app/actions";
 import { LanguageSelector } from "@/components/language-selector";
 import { SnippetDisplay } from "@/components/snippet-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { LANGUAGES } from "@/lib/languages";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
@@ -21,9 +23,12 @@ interface CodeGuesserProps {
   initialSnippet: GenerateCodeSnippetOutput;
 }
 
+const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD", "HARDCORE"];
+
 export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
   const [snippetData, setSnippetData] = useState<GenerateCodeSnippetOutput>(initialSnippet);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(initialSnippet.difficulty);
   const [guessStatus, setGuessStatus] = useState<"idle" | "correct" | "incorrect">("idle");
   const [stats, setStats] = useState<Stats>({ total: 0, correct: 0, streak: 0 });
   const [isPending, startTransition] = useTransition();
@@ -64,7 +69,7 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
 
   const handleNextSnippet = () => {
     startTransition(async () => {
-      const newSnippet = await getNewSnippet();
+      const newSnippet = await getNewSnippet(selectedDifficulty);
       setSnippetData(newSnippet);
       setSelectedLanguage("");
       setGuessStatus("idle");
@@ -99,16 +104,35 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
         <SnippetDisplay snippet={snippetData.snippet} difficulty={snippetData.difficulty} />
         
         {guessStatus === 'idle' && (
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <LanguageSelector
-              languages={LANGUAGES}
-              value={selectedLanguage}
-              onValueChange={setSelectedLanguage}
+          <div className="flex flex-col gap-6 max-w-md mx-auto w-full">
+            <RadioGroup
+              value={selectedDifficulty}
+              onValueChange={(value) => setSelectedDifficulty(value as Difficulty)}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4"
               disabled={isPending}
-            />
-            <Button onClick={handleGuess} disabled={!selectedLanguage || isPending} className="w-full sm:w-auto">
-              {isPending ? <Loader2 className="animate-spin" /> : "Guess"}
-            </Button>
+            >
+              {DIFFICULTIES.map((difficulty) => (
+                <Label
+                  key={difficulty}
+                  htmlFor={difficulty}
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  <RadioGroupItem value={difficulty} id={difficulty} className="sr-only" />
+                  {difficulty}
+                </Label>
+              ))}
+            </RadioGroup>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <LanguageSelector
+                languages={LANGUAGES}
+                value={selectedLanguage}
+                onValueChange={setSelectedLanguage}
+                disabled={isPending}
+              />
+              <Button onClick={handleGuess} disabled={!selectedLanguage || isPending} className="w-full sm:w-auto">
+                {isPending ? <Loader2 className="animate-spin" /> : "Guess"}
+              </Button>
+            </div>
           </div>
         )}
 

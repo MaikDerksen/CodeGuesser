@@ -12,6 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const DifficultySchema = z.enum(['EASY', 'MEDIUM', 'HARD', 'HARDCORE']);
+export type Difficulty = z.infer<typeof DifficultySchema>;
 const LanguageSchema = z.enum([
   'C',
   'C++',
@@ -69,7 +70,7 @@ const LanguageSchema = z.enum([
 ]);
 
 const GenerateCodeSnippetInputSchema = z.object({
-  // No input needed.
+  difficulty: DifficultySchema.optional().describe('The desired difficulty of the code snippet. If not provided, a random difficulty will be selected.'),
 });
 export type GenerateCodeSnippetInput = z.infer<typeof GenerateCodeSnippetInputSchema>;
 
@@ -94,7 +95,7 @@ const prompt = ai.definePrompt({
   prompt: `You are CodeMaster, an expert generator of obfuscated and formatted code snippets for the game GuessTheCode. Each time you are called, you must output exactly four fields in JSON, with no additional commentary:
 
 {
-  "difficulty": "<EASY|MEDIUM|HARD|HARDCORE>",
+  "difficulty": "{{#if difficulty}}{{difficulty}}{{else}}<EASY|MEDIUM|HARD|HARDCORE>{{/if}}",
   "language": "<one language randomly chosen from the FULL list below>",
   "snippet": "<the code snippet formatted according to the chosen difficulty>",
   "solution": "<the name of the language used in the snippet>"
@@ -103,6 +104,7 @@ const prompt = ai.definePrompt({
 Rules:
 
 1. difficulty:
+   - If a difficulty is provided in the input, use it. Otherwise, randomly select one.
    - EASY: multi\u2011line snippet, properly indented, with full syntax highlighting (i.e. language\u2011specific keywords, punctuation, and types clearly distinct).
    - MEDIUM: same multi\u2011line structure and indentation, but rendered in plain ASCII (no color or highlighting).
    - HARD: one\u2011liner snippet, no extraneous whitespace or line breaks; all tokens stuck together except minimal required separators (e.g. semicolons, commas).
@@ -133,4 +135,3 @@ const generateCodeSnippetFlow = ai.defineFlow(
     return output!;
   }
 );
-

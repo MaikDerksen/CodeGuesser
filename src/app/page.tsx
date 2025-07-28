@@ -3,7 +3,7 @@ import { CodeGuesser } from "./code-guesser";
 import { Code } from "lucide-react";
 
 export default async function Home() {
-  const initialSnippet = await generateCodeSnippet({});
+  const initialSnippet = await generateCodeSnippet({ difficulty: 'EASY' });
 
   return (
     <main className="min-h-screen container mx-auto py-8">
