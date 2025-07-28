@@ -12,7 +12,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LANGUAGES } from "@/lib/languages";
 import { CheckCircle2, XCircle, Loader2, Coffee } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface Stats {
@@ -188,16 +187,6 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
                         <Coffee className="mr-2" /> Buy me a coffee
                     </Button>
                 </Link>
-                <div className="p-2 border rounded-md">
-                    <Image
-                        src="https://placehold.co/128x128.png"
-                        alt="Buy me a coffee QR Code"
-                        width={128}
-                        height={128}
-                        className="rounded-sm"
-                        data-ai-hint="qr code"
-                    />
-                </div>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1">
                     <AccordionTrigger>Why is your support important?</AccordionTrigger>
