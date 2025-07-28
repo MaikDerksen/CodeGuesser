@@ -8,8 +8,6 @@ import { SnippetDisplay } from "@/components/snippet-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { LANGUAGES } from "@/lib/languages";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
@@ -101,27 +99,16 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
       </Card>
 
       <div className="w-full max-w-4xl space-y-6">
-        <SnippetDisplay snippet={snippetData.snippet} difficulty={snippetData.difficulty} />
+        <SnippetDisplay
+          snippet={snippetData.snippet}
+          difficulty={selectedDifficulty}
+          difficulties={DIFFICULTIES}
+          onDifficultyChange={setSelectedDifficulty}
+          disabled={isPending || guessStatus !== 'idle'}
+        />
         
         {guessStatus === 'idle' && (
           <div className="flex flex-col gap-6 max-w-md mx-auto w-full">
-            <RadioGroup
-              value={selectedDifficulty}
-              onValueChange={(value) => setSelectedDifficulty(value as Difficulty)}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-              disabled={isPending}
-            >
-              {DIFFICULTIES.map((difficulty) => (
-                <Label
-                  key={difficulty}
-                  htmlFor={difficulty}
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                >
-                  <RadioGroupItem value={difficulty} id={difficulty} className="sr-only" />
-                  {difficulty}
-                </Label>
-              ))}
-            </RadioGroup>
             <div className="flex flex-col sm:flex-row gap-4">
               <LanguageSelector
                 languages={LANGUAGES}
