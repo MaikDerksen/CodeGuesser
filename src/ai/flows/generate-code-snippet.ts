@@ -69,9 +69,12 @@ const LanguageSchema = z.enum([
   'VHDL',
   'Verilog',
 ]);
+export type Language = z.infer<typeof LanguageSchema>;
 
 const GenerateCodeSnippetInputSchema = z.object({
   difficulty: DifficultySchema.optional().describe('The desired difficulty of the code snippet. If not provided, a random difficulty will be selected.'),
+  language: LanguageSchema.optional().describe('A specific language to generate the snippet for. If not provided, a random language will be selected.'),
+  codeToTransform: z.string().optional().describe('An existing snippet of code to re-format to the new difficulty. If provided, the "language" field is required and a new snippet will not be generated.'),
 });
 export type GenerateCodeSnippetInput = z.infer<typeof GenerateCodeSnippetInputSchema>;
 
@@ -99,12 +102,17 @@ Follow these rules precisely:
 
 1.  **difficulty**: Use the provided difficulty. If none is given, select one at random from [EASY, MEDIUM, HARD, HARDCORE]. This field in your output must match the selected difficulty.
 
-2.  **language**: Choose one language at random from the full list provided below.
+2.  **language**:
+    * If the "language" input field is provided, you MUST use that language.
+    * If the "language" input field is NOT provided, you MUST choose one language at random from the full list provided below.
 
-3.  **solution**: This field must exactly match the "language" field.
+3.  **solution**: This field must exactly match the "language" field of the output.
 
-4.  **snippet**: Generate a syntactically valid code snippet (e.g., a function, class, loop) of about 10-20 lines for the chosen language. Then, format this snippet according to the selected difficulty. Your response for the snippet field must be a string containing ONLY the code, formatted as described.
+4.  **snippet**: Your response for the snippet field must be a string containing ONLY the code, formatted as described for the target difficulty. Your output MUST NOT contain any surrounding text, markdown, or HTML tags unless specifically required by the "EASY" difficulty format.
+    * If the "codeToTransform" input is provided, you MUST re-format that exact code into the target difficulty format. Do NOT change the logic or language.
+    * If "codeToTransform" is NOT provided, you MUST generate a new, syntactically valid code snippet (e.g., a function, class, loop) of about 10-20 lines for the chosen language. Then, format this new snippet according to the selected difficulty.
 
+    **Formatting Rules by Difficulty**:
     *   **EASY**: The snippet must be a multi-line string, properly indented, with HTML \`<span>\` tags for basic syntax highlighting. The containing element has a dark background. Use distinct, bright, high-contrast inline CSS \`color\` styles for keywords (e.g., '#81A1C1'), strings (e.g., '#A3BE8C'), comments (e.g., '#5E81AC'), and other token types.
     *   **MEDIUM**: The snippet must be a multi-line string, properly indented, but in plain text with NO SYNTAX HIGHLIGHTING and NO HTML TAGS.
     *   **HARD**: The snippet must be a single-line string with NO HTML TAGS. Remove all unnecessary whitespace and line breaks, leaving only minimal required separators (like semicolons or commas).

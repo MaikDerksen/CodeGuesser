@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import type { GenerateCodeSnippetOutput, Difficulty } from "@/ai/flows/generate-code-snippet";
-import { getNewSnippet } from "@/app/actions";
+import type { GenerateCodeSnippetOutput, Difficulty, Language } from "@/ai/flows/generate-code-snippet";
+import { getNewSnippet, changeSnippetDifficulty } from "@/app/actions";
 import { LanguageSelector } from "@/components/language-selector";
 import { SnippetDisplay } from "@/components/snippet-display";
 import { Button } from "@/components/ui/button";
@@ -29,10 +29,12 @@ const DIFFICULTIES: Difficulty[] = ["EASY", "MEDIUM", "HARD", "HARDCORE"];
 export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
   const [snippetData, setSnippetData] = useState<GenerateCodeSnippetOutput>(initialSnippet);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(initialSnippet.difficulty);
   const [guessStatus, setGuessStatus] = useState<"idle" | "correct" | "incorrect">("idle");
   const [stats, setStats] = useState<Stats>({ total: 0, correct: 0, streak: 0 });
   const [isPending, startTransition] = useTransition();
+
+  // Store the original snippet for each "round" to re-format it
+  const [originalSnippet, setOriginalSnippet] = useState(initialSnippet.snippet);
 
   useEffect(() => {
     try {
@@ -70,12 +72,24 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
 
   const handleNextSnippet = () => {
     startTransition(async () => {
-      const newSnippet = await getNewSnippet(selectedDifficulty);
+      const newSnippet = await getNewSnippet(snippetData.difficulty);
       setSnippetData(newSnippet);
+      setOriginalSnippet(newSnippet.snippet); // Save the new original snippet
       setSelectedLanguage("");
       setGuessStatus("idle");
     });
   };
+
+  const handleDifficultyChange = (newDifficulty: Difficulty) => {
+    // If the difficulty is already the selected one, do nothing.
+    if (newDifficulty === snippetData.difficulty) return;
+
+    startTransition(async () => {
+      // Use the original snippet from the current round to re-format
+      const newSnippet = await changeSnippetDifficulty(originalSnippet, snippetData.language as Language, newDifficulty);
+      setSnippetData(newSnippet);
+    });
+  }
   
   const winPercentage = stats.total > 0 ? ((stats.correct / stats.total) * 100).toFixed(1) : "0.0";
 
@@ -84,10 +98,10 @@ export function CodeGuesser({ initialSnippet }: CodeGuesserProps) {
       <div className="lg:col-span-2">
         <SnippetDisplay
           snippet={snippetData.snippet}
-          difficulty={selectedDifficulty}
+          difficulty={snippetData.difficulty}
           difficulties={DIFFICULTIES}
-          onDifficultyChange={setSelectedDifficulty}
-          disabled={isPending || guessStatus !== 'idle'}
+          onDifficultyChange={handleDifficultyChange}
+          disabled={isPending}
         />
       </div>
 
