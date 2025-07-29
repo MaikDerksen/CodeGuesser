@@ -131,8 +131,8 @@ export function CodeGuesser({ initialSnippet, activeLanguages }: CodeGuesserProp
             {guessStatus !== 'idle' && (
               <div className="flex flex-col items-center gap-4">
                  {guessStatus === 'correct' && (
-                    <Alert>
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <Alert variant="success">
+                        <CheckCircle2 className="h-4 w-4" />
                         <AlertTitle>Correct!</AlertTitle>
                         <AlertDescription>
                             You guessed it! The language was {snippetData.solution}.
