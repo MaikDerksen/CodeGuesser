@@ -116,8 +116,9 @@ Follow these rules precisely:
 3.  **solution**: This field must exactly match the "language" field of the output.
 
 4.  **snippet**: Your response for the snippet field must be a string containing ONLY the code, formatted as described for the target difficulty. Your output MUST NOT contain any surrounding text, markdown, or HTML tags unless specifically required by the "EASY" difficulty format.
-    * If the "codeToTransform" input is provided, you MUST re-format that exact code into the target difficulty format. Do NOT change the logic or language.
-    * If "codeToTransform" is NOT provided, you MUST generate a new, syntactically valid code snippet (e.g., a function, class, loop) of about 10-20 lines for the chosen language. Then, format this new snippet according to the selected difficulty.
+    *   If the "codeToTransform" input is provided, you MUST re-format that exact code into the target difficulty format. Do NOT change the logic or language.
+    *   If "codeToTransform" is NOT provided, you MUST generate a new, syntactically valid code snippet. This snippet should be complex and resemble code from a real-world application (e.g., a component, a utility function, a class, a complex query). It does not need to be compilable, but it must be syntactically plausible and between 10-20 lines. **AVOID creating trivial examples like "Hello, World", fibonacci sequences, or basic loops.**
+    *   The code should be interesting and challenging to identify.
 
     **Formatting Rules by Difficulty**:
     *   **EASY**: The snippet must be a multi-line string, properly indented, with HTML \`<span>\` tags for basic syntax highlighting. The containing element has a dark background. Use distinct, bright, high-contrast inline CSS \`color\` styles for keywords (e.g., '#81A1C1'), strings (e.g., '#A3BE8C'), comments (e.g., '#5E81AC'), and other token types.
