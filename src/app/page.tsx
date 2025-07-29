@@ -10,12 +10,14 @@ import { Code, Settings, Loader2, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LANGUAGES } from "@/lib/languages";
 import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 
 export default function Home() {
   const [initialSnippet, setInitialSnippet] = useState<GenerateCodeSnippetOutput | null>(null);
   const [activeLanguages, setActiveLanguages] = useState<Language[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
@@ -30,7 +32,10 @@ export default function Home() {
       localStorage.removeItem("codeGuesserLangSettings");
     }
     
-    generateCodeSnippet({ difficulty: 'EASY' }).then(setInitialSnippet);
+    generateCodeSnippet({ difficulty: 'EASY' }).then(snippet => {
+        setInitialSnippet(snippet);
+        setIsLoading(false);
+    });
   }, []);
 
   const handleLanguageChange = (updatedLanguages: Language[]) => {
@@ -42,17 +47,23 @@ export default function Home() {
     }
   }
 
-  if (!isClient || !initialSnippet) {
-    return (
-       <div className="min-h-screen container mx-auto p-4 flex flex-col items-center justify-center">
-        <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">Loading your game...</p>
-      </div>
-    )
-  }
-
   return (
     <main className="min-h-screen container mx-auto p-4 md:py-8">
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+            <Card className="w-full max-w-sm">
+                 <CardHeader>
+                    <CardTitle className="text-center">Welcome to Code Guesser!</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center space-y-4">
+                    <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto" />
+                    <p className="text-muted-foreground">
+                        Please wait a moment while we warm up the AI for your first challenge. This initial setup can take a few seconds.
+                    </p>
+                </CardContent>
+            </Card>
+        </div>
+      )}
       <header className="mb-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -88,7 +99,7 @@ export default function Home() {
         </p>
 
       </header>
-      <CodeGuesser initialSnippet={initialSnippet} activeLanguages={activeLanguages} />
+      {initialSnippet && <CodeGuesser initialSnippet={initialSnippet} activeLanguages={activeLanguages} />}
     </main>
   );
 }
