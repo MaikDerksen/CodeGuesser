@@ -14,7 +14,7 @@ import {z} from 'genkit';
 
 const DifficultySchema = z.enum(['EASY', 'MEDIUM', 'HARD', 'HARDCORE']);
 export type Difficulty = z.infer<typeof DifficultySchema>;
-const LanguageSchema = z.enum([
+const ALL_LANGUAGES = [
   'C',
   'C++',
   'C#',
@@ -68,7 +68,8 @@ const LanguageSchema = z.enum([
   'Scheme',
   'VHDL',
   'Verilog',
-]);
+] as const;
+const LanguageSchema = z.enum(ALL_LANGUAGES);
 export type Language = z.infer<typeof LanguageSchema>;
 
 const GenerateCodeSnippetInputSchema = z.object({
@@ -78,6 +79,13 @@ const GenerateCodeSnippetInputSchema = z.object({
   codeToTransform: z.string().optional().describe('An existing snippet of code to re-format to the new difficulty. If provided, the "language" field is required and a new snippet will not be generated.'),
 });
 export type GenerateCodeSnippetInput = z.infer<typeof GenerateCodeSnippetInputSchema>;
+
+// This internal schema is used for the prompt itself, after we've processed the input.
+const InternalPromptInputSchema = z.object({
+    difficulty: DifficultySchema,
+    language: LanguageSchema,
+    codeToTransform: z.string().optional(),
+});
 
 const GenerateCodeSnippetOutputSchema = z.object({
   difficulty: DifficultySchema,
@@ -95,18 +103,15 @@ export async function generateCodeSnippet(
 
 const prompt = ai.definePrompt({
   name: 'generateCodeSnippetPrompt',
-  input: {schema: GenerateCodeSnippetInputSchema},
+  input: {schema: InternalPromptInputSchema},
   output: {schema: GenerateCodeSnippetOutputSchema},
   prompt: `You are CodeMaster, an expert generator of obfuscated and formatted code snippets for the game GuessTheCode. Your output must be a single, valid JSON object with four fields: "difficulty", "language", "snippet", and "solution".
 
 Follow these rules precisely:
 
-1.  **difficulty**: Use the provided difficulty. If none is given, select one at random from [EASY, MEDIUM, HARD, HARDCORE]. This field in your output must match the selected difficulty.
+1.  **difficulty**: You MUST use the provided difficulty: **{{difficulty}}**. This field in your output must exactly match.
 
-2.  **language**:
-    * If the "language" input field is provided, you MUST use that language.
-    * If the "languages" input array is provided, you MUST choose one language at random from that list.
-    * If neither "language" nor "languages" is provided, you MUST choose one language at random from the full list provided below. Your selection must be genuinely random; do not show bias towards common languages like Python or JavaScript. Strive for variety in your selections.
+2.  **language**: You MUST use the provided language: **{{language}}**. This field in your output must exactly match.
 
 3.  **solution**: This field must exactly match the "language" field of the output.
 
@@ -118,17 +123,12 @@ Follow these rules precisely:
     *   **EASY**: The snippet must be a multi-line string, properly indented, with HTML \`<span>\` tags for basic syntax highlighting. The containing element has a dark background. Use distinct, bright, high-contrast inline CSS \`color\` styles for keywords (e.g., '#81A1C1'), strings (e.g., '#A3BE8C'), comments (e.g., '#5E81AC'), and other token types.
     *   **MEDIUM**: The snippet must be a multi-line string, properly indented, but in plain text with NO SYNTAX HIGHLIGHTING and NO HTML TAGS.
     *   **HARD**: The snippet must be a single-line string with NO HTML TAGS. Remove all unnecessary whitespace and line breaks, leaving only minimal required separators (like semicolons or commas).
-    *   **HARDCORE**: The snippet must be a single-line string with NO HTML TAGS and absolutely NO WHITESPACE. Additionally, randomly replace 1 to 3 significant tokens or identifiers with a single underscore character ('_').
-
-**Available Languages**:
-{{#if languages}}
-{{#each languages}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
-{{else}}
-C, C++, C#, Java, JavaScript, TypeScript, Python, Ruby, PHP, Go, Rust, Swift, Kotlin, SQL, MATLAB, R, Bash, PowerShell, Visual Basic, Perl, Haskell, Elm, F#, OCaml, Elixir, Scala, Lisp, ML, Prolog, Erlang, Brainfuck, Befunge, Piet, Assembly, Dart, Julia, Nim, Objective-C, Ada, GDScript, Hack, Cobol, Fortran, Lua, Crystal, D, Smalltalk, Forth, Racket, Tcl, Scheme, VHDL, Verilog.
-{{/if}}
-
-**Input Difficulty**: {{#if difficulty}}{{difficulty}}{{else}}random{{/if}}`,
+    *   **HARDCORE**: The snippet must be a single-line string with NO HTML TAGS and absolutely NO WHITESPACE. Additionally, randomly replace 1 to 3 significant tokens or identifiers with a single underscore character ('_').`,
 })
+
+function getRandom<T>(arr: readonly T[] | T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
 
 const generateCodeSnippetFlow = ai.defineFlow(
   {
@@ -136,8 +136,37 @@ const generateCodeSnippetFlow = ai.defineFlow(
     inputSchema: GenerateCodeSnippetInputSchema,
     outputSchema: GenerateCodeSnippetOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    // Determine the final difficulty
+    const difficulty = input.difficulty ?? getRandom(DifficultySchema.options);
+
+    // Determine the final language
+    let language: Language;
+    if (input.language) {
+      language = input.language;
+    } else if (input.languages && input.languages.length > 0) {
+      language = getRandom(input.languages);
+    } else {
+      language = getRandom(ALL_LANGUAGES);
+    }
+    
+    // Prepare the input for the AI prompt
+    const promptInput: z.infer<typeof InternalPromptInputSchema> = {
+        difficulty,
+        language,
+        codeToTransform: input.codeToTransform,
+    };
+
+    const {output} = await prompt(promptInput);
+
+    // The AI might occasionally fail to set the language/difficulty correctly despite the prompt.
+    // We'll override it here to ensure consistency.
+    if (output) {
+      output.language = language;
+      output.difficulty = difficulty;
+      output.solution = language;
+    }
+    
     return output!;
   }
 );
